@@ -41,32 +41,33 @@
     hls.loadSource(videoSrc);
     hls.attachMedia(video);
 
-    hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
-      const availableQualities = hls.levels.map((l) => l.height).filter((v, i, a) => a.indexOf(v) === i);
+    hls.on(Hls.Events.MANIFEST_PARSED, function () {
+      // Extract available resolutions
+      const availableQualities = hls.levels.map(l => l.height).filter((v, i, a) => a.indexOf(v) === i);
 
+      // Init Plyr
       const player = new Plyr(video, {
         autoplay: true,
         muted: true,
-        settings: ['quality', 'speed', 'loop']
+        settings: ['quality', 'speed', 'loop'],
+        quality: {
+          default: availableQualities[0],
+          options: availableQualities,
+          forced: true,
+          onChange: (newQuality) => {
+            // Set HLS level based on selected quality
+            hls.levels.forEach((level, levelIndex) => {
+              if (level.height === newQuality) {
+                hls.currentLevel = levelIndex;
+              }
+            });
+          }
+        }
       });
 
-      // Add quality options to Plyr
-      player.options.quality = {
-        default: availableQualities[0],
-        options: availableQualities,
-        forced: true,
-        onChange: (newQuality) => {
-          hls.levels.forEach((level, levelIndex) => {
-            if (level.height === newQuality) {
-              hls.currentLevel = levelIndex;
-            }
-          });
-        }
-      };
-
-      // Apply first available quality as default
+      // Default to best quality (last in list = highest resolution)
       if (availableQualities.length) {
-        hls.currentLevel = 0;
+        hls.currentLevel = hls.levels.length - 1;
       }
     });
   } else {

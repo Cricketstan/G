@@ -4,91 +4,50 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="referrer" content="no-referrer">
-<title>PLYR PLAYER</title>
+<title>Player</title>
 
 <!-- Plyr + HLS.js -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css" />
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.polyfilled.js"></script>
 
-<!-- Styles -->
-<link href='https://www.hls-player.net/fav.png' rel='icon' type='image/x-icon'/>
 <style>
-  body {
+  html, body {
     margin: 0;
-    padding: 0;       
+    padding: 0;
+    height: 100%;
+    background: black;
   }
-  .video-con {
-    position: relative;
+  #plyr-player {
     width: 100%;
-    margin-bottom: 20px;
-  }
-  .join-us {
-    position: absolute;
-    z-index: 100;
-    top: 6px;
-    left: 5px;
-    height: 30px;
-    width: 90px;
-    color: rgb(204, 204, 204);
-    border: 2px solid rgb(204, 204, 204);
-    padding: 1px 0px;
-    border-radius: 2px;
-    text-align: center;
+    height: 100%;
   }
 </style>
 </head>
 <body>
 
-<!-- Plyr Player (previously Clappr container) -->
-<div class="video-con embed-responsive">
-  <video id="plyr-player-1" controls width="100%" height="100%"></video>
-  <script>
-    function getQueryParam(param) {
-      const queryParams = new URLSearchParams(window.location.search);
-      return queryParams.get(param);
-    }
+<video id="plyr-player" controls></video>
 
-    const videoSrc = getQueryParam('url');
-    const plyrVideo1 = document.getElementById('plyr-player-1');
+<script>
+  function getQueryParam(param) {
+    return new URLSearchParams(window.location.search).get(param);
+  }
 
-    if (Hls.isSupported()) {
-      const hls = new Hls({
-        liveSyncDurationCount: 3,
-        maxBufferLength: 2000
-      });
-      hls.loadSource(videoSrc);
-      hls.attachMedia(plyrVideo1);
-      hls.on(Hls.Events.MANIFEST_PARSED, function() {
-        const plyrPlayer1 = new Plyr(plyrVideo1, { autoplay: true, muted: true });
-      });
-    } else {
-      plyrVideo1.src = videoSrc;
-      const plyrPlayer1 = new Plyr(plyrVideo1, { autoplay: true, muted: true });
-    }
-  </script>
-</div>
+  const videoSrc = getQueryParam('url');
+  const video = document.getElementById('plyr-player');
 
-<!-- Plyr Player (original second container) -->
-<div class="video-con">
-  <video id="plyr-player-2" controls width="100%" height="100%"></video>
-  <script>
-    const plyrVideo2 = document.getElementById('plyr-player-2');
-    const videoSrc2 = getQueryParam('url');
-
-    if (Hls.isSupported()) {
-      const hls2 = new Hls();
-      hls2.loadSource(videoSrc2);
-      hls2.attachMedia(plyrVideo2);
-      hls2.on(Hls.Events.MANIFEST_PARSED, function() {
-        const plyrPlayer2 = new Plyr(plyrVideo2, { autoplay: true, muted: true });
-      });
-    } else {
-      plyrVideo2.src = videoSrc2;
-      const plyrPlayer2 = new Plyr(plyrVideo2, { autoplay: true, muted: true });
-    }
-  </script>
-</div>
+  if (Hls.isSupported()) {
+    const hls = new Hls();
+    hls.loadSource(videoSrc);
+    hls.attachMedia(video);
+    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+      new Plyr(video, { autoplay: true, muted: true });
+    });
+  } else {
+    video.src = videoSrc;
+    new Plyr(video, { autoplay: true, muted: true });
+  }
+</script>
 
 </body>
 </html>

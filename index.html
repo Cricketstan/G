@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="referrer" content="no-referrer">
-<title>Player</title>
+<title>Full Page Plyr Player with Quality Selector</title>
 
 <!-- Plyr + HLS.js -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css" />
@@ -26,7 +26,7 @@
 </head>
 <body>
 
-<video id="plyr-player" controls></video>
+<video id="plyr-player" controls playsinline></video>
 
 <script>
   function getQueryParam(param) {
@@ -40,8 +40,34 @@
     const hls = new Hls();
     hls.loadSource(videoSrc);
     hls.attachMedia(video);
-    hls.on(Hls.Events.MANIFEST_PARSED, () => {
-      new Plyr(video, { autoplay: true, muted: true });
+
+    hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+      const availableQualities = hls.levels.map((l) => l.height).filter((v, i, a) => a.indexOf(v) === i);
+
+      const player = new Plyr(video, {
+        autoplay: true,
+        muted: true,
+        settings: ['quality', 'speed', 'loop']
+      });
+
+      // Add quality options to Plyr
+      player.options.quality = {
+        default: availableQualities[0],
+        options: availableQualities,
+        forced: true,
+        onChange: (newQuality) => {
+          hls.levels.forEach((level, levelIndex) => {
+            if (level.height === newQuality) {
+              hls.currentLevel = levelIndex;
+            }
+          });
+        }
+      };
+
+      // Apply first available quality as default
+      if (availableQualities.length) {
+        hls.currentLevel = 0;
+      }
     });
   } else {
     video.src = videoSrc;

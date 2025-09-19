@@ -1,84 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Live Cricket Video Player</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Plyr CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css" />
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
-      margin: 0;
-      padding: 20px;
-    }
-    .container {
-      max-width: 900px;
-      margin: auto;
-      background: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-    h2 {
-      text-align: center;
-      color: #007bff;
-    }
-    .player-wrapper {
-      position: relative;
-      padding-top: 56.25%; /* 16:9 Aspect Ratio */
-      margin-bottom: 20px;
-    }
-    .player-wrapper video {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="referrer" content="no-referrer">
+<title>PLYR PLAYER</title>
+
+<!-- Plyr + HLS.js -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css" />
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.polyfilled.js"></script>
+
+<!-- Styles -->
+<link href='https://www.hls-player.net/fav.png' rel='icon' type='image/x-icon'/>
+<style>
+  body {
+    margin: 0;
+    padding: 0;       
+  }
+  .video-con {
+    position: relative;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  .join-us {
+    position: absolute;
+    z-index: 100;
+    top: 6px;
+    left: 5px;
+    height: 30px;
+    width: 90px;
+    color: rgb(204, 204, 204);
+    border: 2px solid rgb(204, 204, 204);
+    padding: 1px 0px;
+    border-radius: 2px;
+    text-align: center;
+  }
+</style>
 </head>
 <body>
-  <div class="container">
-    <h2>Live Cricket Video</h2>
 
-    <div class="player-wrapper">
-      <video id="player" controls crossorigin playsinline></video>
-    </div>
-
-    <div id="match-info">
-      <!-- Match info will go here -->
-    </div>
-  </div>
-
-  <!-- Plyr JS -->
-  <script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.polyfilled.js"></script>
-  <!-- HLS JS for .m3u8 streams -->
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.0/dist/hls.min.js"></script>
-
+<!-- Plyr Player (previously Clappr container) -->
+<div class="video-con embed-responsive">
+  <video id="plyr-player-1" controls width="100%" height="100%"></video>
   <script>
-    // Your HLS stream URL (replace with your live stream)
-    const videoUrl = 'https://in-mc-fdlive.fancode.com/mumbai/136742_english_hls_cd7ccd163687982ta-di_h264/index.m3u8';
-
-    const video = document.getElementById('player');
-
-    if (Hls.isSupported()) {
-      const hls = new Hls();
-      hls.loadSource(videoUrl);
-      hls.attachMedia(video);
-      hls.on(Hls.Events.MANIFEST_PARSED, function() {
-        video.play();
-      });
-    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      video.src = videoUrl;
-      video.addEventListener('loadedmetadata', function() {
-        video.play();
-      });
+    function getQueryParam(param) {
+      const queryParams = new URLSearchParams(window.location.search);
+      return queryParams.get(param);
     }
 
-    // Initialize Plyr
-    const player = new Plyr('#player');
+    const videoSrc = getQueryParam('url');
+    const plyrVideo1 = document.getElementById('plyr-player-1');
+
+    if (Hls.isSupported()) {
+      const hls = new Hls({
+        liveSyncDurationCount: 3,
+        maxBufferLength: 2000
+      });
+      hls.loadSource(videoSrc);
+      hls.attachMedia(plyrVideo1);
+      hls.on(Hls.Events.MANIFEST_PARSED, function() {
+        const plyrPlayer1 = new Plyr(plyrVideo1, { autoplay: true, muted: true });
+      });
+    } else {
+      plyrVideo1.src = videoSrc;
+      const plyrPlayer1 = new Plyr(plyrVideo1, { autoplay: true, muted: true });
+    }
   </script>
+</div>
+
+<!-- Plyr Player (original second container) -->
+<div class="video-con">
+  <video id="plyr-player-2" controls width="100%" height="100%"></video>
+  <script>
+    const plyrVideo2 = document.getElementById('plyr-player-2');
+    const videoSrc2 = getQueryParam('url');
+
+    if (Hls.isSupported()) {
+      const hls2 = new Hls();
+      hls2.loadSource(videoSrc2);
+      hls2.attachMedia(plyrVideo2);
+      hls2.on(Hls.Events.MANIFEST_PARSED, function() {
+        const plyrPlayer2 = new Plyr(plyrVideo2, { autoplay: true, muted: true });
+      });
+    } else {
+      plyrVideo2.src = videoSrc2;
+      const plyrPlayer2 = new Plyr(plyrVideo2, { autoplay: true, muted: true });
+    }
+  </script>
+</div>
+
 </body>
 </html>
